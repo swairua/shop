@@ -13,6 +13,10 @@
             <a href="<?= base_url('admin/settings?group=catalog') ?>" class="list-group-item list-group-item-action <?= $group == 'catalog' ? 'active' : '' ?>"><i class="bi bi-box"></i> Catalog</a>
             <a href="<?= base_url('admin/settings?group=seo') ?>" class="list-group-item list-group-item-action <?= $group == 'seo' ? 'active' : '' ?>"><i class="bi bi-search"></i> SEO</a>
             <a href="<?= base_url('admin/settings?group=social') ?>" class="list-group-item list-group-item-action <?= $group == 'social' ? 'active' : '' ?>"><i class="bi bi-share"></i> Social</a>
+            <a href="<?= base_url('admin/settings?group=hero') ?>" class="list-group-item list-group-item-action <?= $group == 'hero' ? 'active' : '' ?>"><i class="bi bi-image"></i> Hero</a>
+            <a href="<?= base_url('admin/pages') ?>" class="list-group-item list-group-item-action <?= is_active('admin/pages') ?>"><i class="bi bi-file-text"></i> Pages</a>
+            <a href="<?= base_url('admin/subscribers') ?>" class="list-group-item list-group-item-action <?= is_active('admin/subscribers') ?>"><i class="bi bi-envelope"></i> Subscribers</a>
+            <a href="<?= base_url('admin/activity-logs') ?>" class="list-group-item list-group-item-action <?= is_active('admin/activity-logs') ?>"><i class="bi bi-activity"></i> Activity Logs</a>
         </div>
     </div>
     <div class="col-md-10">
@@ -26,15 +30,17 @@
                     <input type="hidden" name="group" value="<?= $group ?>">
                     <?php foreach ($settings as $key => $value): ?>
                         <?php
-                        $label = ucwords(str_replace('_', ' ', $key));
+                        $label = ucwords(str_replace('_', ' ', preg_replace('/^(hero_|shop_)/', '', $key)));
                         $type = 'text';
                         if (strpos($key, 'email') !== false) $type = 'email';
                         if (strpos($key, 'url') !== false || strpos($key, 'facebook') !== false || strpos($key, 'twitter') !== false || strpos($key, 'instagram') !== false || strpos($key, 'tiktok') !== false || strpos($key, 'linkedin') !== false || strpos($key, 'pinterest') !== false) $type = 'url';
-                        if (strpos($key, 'description') !== false) $type = 'textarea';
+                        if (strpos($key, 'description') !== false || strpos($key, 'subheading') !== false) $type = 'textarea';
                         if (strpos($key, 'logo') !== false || strpos($key, 'favicon') !== false || strpos($key, 'image') !== false) $type = 'image';
                         if (strpos($key, 'rate') !== false || strpos($key, 'price') !== false) $type = 'number';
                         if (strpos($key, 'enable') !== false || strpos($key, 'enabled') !== false) $type = 'select';
-                        if (strpos($key, 'color') !== false || $key === 'primary_color' || $key === 'secondary_color' || $key === 'accent_color' || $key === 'header_bg' || $key === 'footer_bg') $type = 'color';
+                        if (strpos($key, 'color') !== false || strpos($key, 'bg_start') !== false || strpos($key, 'bg_end') !== false) $type = 'color';
+                        if (strpos($key, 'animation') !== false) $type = 'animation_select';
+                        if ($key === 'hero_overlay') $type = 'range';
                         ?>
                         <div class="mb-3">
                             <label class="form-label"><?= $label ?></label>
@@ -54,6 +60,18 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <input type="color" name="<?= $key ?>" value="<?= $value ?>" class="form-control form-control-color" style="width:60px;height:40px;padding:3px;cursor:pointer;" oninput="this.nextElementSibling.value=this.value">
                                     <input type="text" value="<?= $value ?>" class="form-control" style="max-width:200px;font-family:monospace;" oninput="this.previousElementSibling.value='#'+this.value.replace('#','')" placeholder="#hex">
+                                </div>
+                            <?php elseif ($type === 'animation_select'): ?>
+                                <select name="<?= $key ?>" class="form-select">
+                                    <option value="particles" <?= $value == 'particles' ? 'selected' : '' ?>>Particles</option>
+                                    <option value="gradient" <?= $value == 'gradient' ? 'selected' : '' ?>>Animated Gradient</option>
+                                    <option value="floating" <?= $value == 'floating' ? 'selected' : '' ?>>Floating Shapes</option>
+                                    <option value="none" <?= $value == 'none' ? 'selected' : '' ?>>None</option>
+                                </select>
+                            <?php elseif ($type === 'range'): ?>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="range" name="<?= $key ?>" min="0" max="1" step="0.1" value="<?= $value ?>" class="form-range" style="max-width:300px" oninput="this.nextElementSibling.textContent=this.value">
+                                    <span class="badge bg-secondary fs-6"><?= $value ?></span>
                                 </div>
                             <?php else: ?>
                                 <input type="<?= $type ?>" name="<?= $key ?>" class="form-control" value="<?= $value ?>">

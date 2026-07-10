@@ -229,4 +229,20 @@ class ApiController extends Controller {
 
         $this->json(['success' => true, 'message' => 'Review submitted for approval']);
     }
+
+    public function subscribe() {
+        $email = trim($this->post('email', ''));
+        $name = trim($this->post('name', ''));
+        if (!validate_email($email)) {
+            $this->json(['success' => false, 'message' => 'Invalid email address'], 422);
+        }
+        $check = $this->db->query("SELECT id FROM subscribers WHERE email = '" . $this->db->escape($email) . "'")->fetch_assoc();
+        if ($check) {
+            $this->json(['success' => false, 'message' => 'Already subscribed'], 409);
+        }
+        $stmt = $this->db->prepare("INSERT INTO subscribers (email, name, status) VALUES (?, ?, 'active')");
+        $stmt->bind_param("ss", $email, $name);
+        $stmt->execute();
+        $this->json(['success' => true, 'message' => 'Subscribed successfully']);
+    }
 }

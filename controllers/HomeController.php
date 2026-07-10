@@ -124,4 +124,8 @@ class HomeController extends Controller {
         $data = ['slug' => $slug];
         $this->render('front/page', $data);
     }
+
+    public function contact() {
+        $this->render('front/contact');
+    }
 }

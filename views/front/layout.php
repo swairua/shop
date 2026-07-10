@@ -177,7 +177,7 @@
             <div class="row g-4">
                 <div class="col-md-4">
                     <h5><i class="bi bi-shop"></i> <?= App::getSetting('shop_name', 'My Shop') ?></h5>
-                    <p class="small"><?= App::getSetting('shop_address', '') ?></p>
+                    <p class="small"><i class="bi bi-geo-alt"></i> <?= App::getSetting('shop_address', '') ?></p>
                     <p class="small mb-1"><i class="bi bi-envelope"></i> <?= App::getSetting('shop_email', '') ?></p>
                     <p class="small"><i class="bi bi-telephone"></i> <?= App::getSetting('shop_phone', '') ?></p>
                 </div>
@@ -196,19 +196,20 @@
                     <ul>
                         <li><a href="<?= base_url('contact') ?>"><i class="bi bi-chevron-right"></i> Contact Us</a></li>
                         <li><a href="<?= base_url('account') ?>"><i class="bi bi-chevron-right"></i> My Account</a></li>
-                        <li><a href="<?= base_url('orders') ?>"><i class="bi bi-chevron-right"></i> Track Order</a></li>
-                        <li><a href="<?= base_url('shop') ?>"><i class="bi bi-chevron-right"></i> Shipping Info</a></li>
-                        <li><a href="<?= base_url('shop') ?>"><i class="bi bi-chevron-right"></i> Returns</a></li>
+                        <li><a href="<?= base_url('account') ?>"><i class="bi bi-chevron-right"></i> Track Order</a></li>
+                        <li><a href="<?= base_url('page/shipping-info') ?>"><i class="bi bi-chevron-right"></i> Shipping Info</a></li>
+                        <li><a href="<?= base_url('page/returns') ?>"><i class="bi bi-chevron-right"></i> Returns</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h5>Stay Connected</h5>
                     <p class="small">Subscribe to our newsletter for exclusive offers.</p>
-                    <form class="newsletter-form mb-3" onsubmit="event.preventDefault(); alert('Subscribed! (demo)')">
+                    <form class="newsletter-form mb-3" id="newsletterForm">
                         <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Your email address">
+                            <input type="email" id="newsletterEmail" class="form-control" placeholder="Your email address" required>
                             <button class="btn btn-primary" type="submit">Subscribe</button>
                         </div>
+                        <small class="newsletter-msg mt-1 d-block"></small>
                     </form>
                     <div class="social-links">
                         <?php if (App::getSetting('facebook_url')): ?><a href="<?= App::getSetting('facebook_url') ?>" class="social-link facebook" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a><?php endif; ?>
@@ -257,6 +258,26 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
     <script src="<?= base_url('assets/js/app.js') ?>"></script>
+    <script>
+document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var input = document.getElementById('newsletterEmail');
+    var msg = this.querySelector('.newsletter-msg');
+    msg.textContent = '';
+    fetch('<?= base_url('api/subscribe') ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'email=' + encodeURIComponent(input.value)
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        msg.style.color = d.success ? '#10b981' : '#ef4444';
+        msg.textContent = d.message;
+        if (d.success) input.value = '';
+    }).catch(function() {
+        msg.style.color = '#ef4444';
+        msg.textContent = 'Something went wrong.';
+    });
+});
+    </script>
     <?php if (isset($extraJs)) echo $extraJs; ?>
 </body>
 </html>

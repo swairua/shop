@@ -56,6 +56,7 @@ class Schema {
         $this->createPagesTable();
         $this->createCartTable();
         $this->createCartItemsTable();
+        $this->createSubscribersTable();
         $this->seedData();
         return true;
     }
@@ -800,6 +801,18 @@ class Schema {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
 
+    private function createSubscribersTable() {
+        if ($this->tableExists('subscribers')) return;
+        $this->db->query("CREATE TABLE subscribers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(100) NOT NULL UNIQUE,
+            name VARCHAR(100) DEFAULT NULL,
+            status ENUM('active','unsubscribed') NOT NULL DEFAULT 'active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_sub_email (email)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
     private function seedData() {
         $this->seedSettings();
         $this->seedAdminUser();
@@ -840,6 +853,17 @@ class Schema {
             ['pinterest_url', '', 'social', 'text'],
             ['whatsapp_number', '', 'social', 'text'],
             ['whatsapp_message', 'Hi! I want to order from your shop', 'social', 'text'],
+            ['hero_heading', 'Discover Premium Products', 'hero', 'text'],
+            ['hero_subheading', 'Shop the latest trends with unbeatable prices and fast delivery to your doorstep.', 'hero', 'text'],
+            ['hero_button_text', 'Shop Now', 'hero', 'text'],
+            ['hero_button_url', 'shop', 'hero', 'text'],
+            ['hero_secondary_text', 'Learn More', 'hero', 'text'],
+            ['hero_secondary_url', '#featured', 'hero', 'text'],
+            ['hero_image', '', 'hero', 'image'],
+            ['hero_bg_start', '#0f172a', 'hero', 'text'],
+            ['hero_bg_end', '#1e3a5f', 'hero', 'text'],
+            ['hero_overlay', '0.6', 'hero', 'text'],
+            ['hero_animation', 'particles', 'hero', 'text'],
             ['primary_color', '#2563eb', 'appearance', 'text'],
             ['secondary_color', '#7c3aed', 'appearance', 'text'],
             ['accent_color', '#f59e0b', 'appearance', 'text'],
@@ -927,5 +951,10 @@ class Schema {
             ('Cash on Delivery', 'cod', 'Pay when you receive', 'cod', 'active', 1),
             ('M-Pesa', 'mpesa', 'Pay via M-Pesa', 'mpesa', 'active', 2),
             ('Bank Transfer', 'bank', 'Pay via bank transfer', 'bank', 'active', 3)");
+
+        $this->db->query("INSERT IGNORE INTO pages (title, slug, content, meta_title, meta_description, status) VALUES
+            ('About Us', 'about', '<h3>Welcome to My Shop</h3><p>We are a leading e-commerce platform dedicated to providing quality products at affordable prices. Founded with a passion for excellence, we serve thousands of happy customers across the region.</p><p>Our mission is to make shopping easy, secure, and enjoyable for everyone.</p>', 'About Us - My Shop', 'Learn more about My Shop and our mission', 'published'),
+            ('Shipping Info', 'shipping-info', '<h3>Shipping Information</h3><p>We offer fast and reliable shipping across the country. Orders are processed within 1-2 business days.</p><h4>Delivery Timeframes</h4><ul><li>Nairobi: 1-2 business days</li><li>Major cities: 2-4 business days</li><li>Upcountry: 4-7 business days</li></ul><h4>Shipping Costs</h4><p>Free shipping on orders over KSh 5,000. Standard shipping rates apply for smaller orders.</p>', 'Shipping Info - My Shop', 'Learn about our shipping policy and delivery timeframes', 'published'),
+            ('Returns & Exchanges', 'returns', '<h3>Returns & Exchanges</h3><p>We want you to be completely satisfied with your purchase. If you are not happy, we offer easy returns within 14 days of delivery.</p><h4>Return Conditions</h4><ul><li>Items must be unused and in original packaging</li><li>Return shipping costs are covered by the customer unless the item is defective</li><li>Refunds are processed within 5-7 business days after we receive the item</li></ul><p>For any questions, please contact our support team.</p>', 'Returns & Exchanges - My Shop', 'Read our returns policy for hassle-free exchanges', 'published')");
     }
 }

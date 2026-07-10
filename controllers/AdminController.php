@@ -772,4 +772,76 @@ class AdminController extends Controller {
         $this->setFlash('success', 'User deleted');
         $this->redirect('admin/users');
     }
+
+    public function pages() {
+        $pages = $this->db->query("SELECT * FROM pages ORDER BY created_at DESC")->fetch_all(MYSQLI_ASSOC);
+        $this->renderAdmin('admin/pages/index', ['pages' => $pages]);
+    }
+
+    public function pageCreate() {
+        if ($this->isPost()) {
+            $data = [
+                'title' => sanitize_input($this->post('title')),
+                'slug' => sanitize_input($this->post('slug') ?: slugify($this->post('title'))),
+                'content' => $this->post('content'),
+                'meta_title' => sanitize_input($this->post('meta_title')),
+                'meta_description' => sanitize_input($this->post('meta_description')),
+                'status' => $this->post('status', 'draft')
+            ];
+            $stmt = $this->db->prepare("INSERT INTO pages (title, slug, content, meta_title, meta_description, status) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssss", $data['title'], $data['slug'], $data['content'], $data['meta_title'], $data['meta_description'], $data['status']);
+            $stmt->execute();
+            $this->setFlash('success', 'Page created');
+            $this->redirect('admin/pages');
+        }
+        $this->renderAdmin('admin/pages/form');
+    }
+
+    public function pageEdit($id) {
+        $page = $this->db->query("SELECT * FROM pages WHERE id = {$id}")->fetch_assoc();
+        if (!$page) $this->redirect('admin/pages');
+        if ($this->isPost()) {
+            $data = [
+                'title' => sanitize_input($this->post('title')),
+                'slug' => sanitize_input($this->post('slug') ?: slugify($this->post('title'))),
+                'content' => $this->post('content'),
+                'meta_title' => sanitize_input($this->post('meta_title')),
+                'meta_description' => sanitize_input($this->post('meta_description')),
+                'status' => $this->post('status', 'draft')
+            ];
+            $stmt = $this->db->prepare("UPDATE pages SET title=?, slug=?, content=?, meta_title=?, meta_description=?, status=? WHERE id=?");
+            $stmt->bind_param("ssssssi", $data['title'], $data['slug'], $data['content'], $data['meta_title'], $data['meta_description'], $data['status'], $id);
+            $stmt->execute();
+            $this->setFlash('success', 'Page updated');
+            $this->redirect('admin/pages');
+        }
+        $this->renderAdmin('admin/pages/form', ['page' => $page]);
+    }
+
+    public function pageDelete($id) {
+        $this->db->query("DELETE FROM pages WHERE id = {$id}");
+        $this->setFlash('success', 'Page deleted');
+        $this->redirect('admin/pages');
+    }
+
+    public function subscribers() {
+        $subscribers = $this->db->query("SELECT * FROM subscribers ORDER BY created_at DESC")->fetch_all(MYSQLI_ASSOC);
+        $this->renderAdmin('admin/subscribers/index', ['subscribers' => $subscribers]);
+    }
+
+    public function subscriberDelete($id) {
+        $this->db->query("DELETE FROM subscribers WHERE id = {$id}");
+        $this->setFlash('success', 'Subscriber deleted');
+        $this->redirect('admin/subscribers');
+    }
+
+    public function activityLogs() {
+        $page = $this->get('page', 1);
+        $perPage = 30;
+        $offset = ($page - 1) * $perPage;
+        $total = $this->db->query("SELECT COUNT(*) as cnt FROM activity_logs")->fetch_assoc()['cnt'];
+        $totalPages = ceil($total / $perPage);
+        $logs = $this->db->query("SELECT al.*, u.name as user_name FROM activity_logs al LEFT JOIN users u ON al.user_id = u.id ORDER BY al.created_at DESC LIMIT {$offset}, {$perPage}")->fetch_all(MYSQLI_ASSOC);
+        $this->renderAdmin('admin/activity_logs/index', ['logs' => $logs, 'page' => $page, 'totalPages' => $totalPages, 'total' => $total]);
+    }
 }
