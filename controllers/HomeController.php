@@ -52,13 +52,20 @@ class HomeController extends Controller {
 
         $product->update($prod['id'], ['views' => $prod['views'] + 1]);
 
+        $inWishlist = false;
+        if (is_customer()) {
+            $w = $this->db->query("SELECT id FROM wishlist WHERE customer_id = {$_SESSION['customer_id']} AND product_id = {$prod['id']}");
+            $inWishlist = (bool)$w->fetch_assoc();
+        }
+
         $data = [
             'product' => $product->getWithRelations($prod['id']),
             'images' => $product->getImages($prod['id']),
             'variants' => $product->getVariants($prod['id']),
             'reviews' => $product->getReviews($prod['id']),
             'rating' => $product->getAverageRating($prod['id']),
-            'related' => $product->getRelated($prod['id'], $prod['category_id'])
+            'related' => $product->getRelated($prod['id'], $prod['category_id']),
+            'inWishlist' => $inWishlist
         ];
         $this->render('front/product', $data);
     }

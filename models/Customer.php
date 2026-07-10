@@ -9,6 +9,7 @@ class Customer extends Model {
             $customer['addresses'] = $this->query("SELECT * FROM customer_addresses WHERE customer_id = ?", [$id]);
             $customer['total_orders'] = count($customer['orders']);
             $customer['total_spent'] = array_sum(array_column($customer['orders'], 'total'));
+            $customer['wishlist_count'] = $this->queryRow("SELECT COUNT(*) as cnt FROM wishlist WHERE customer_id = ?", [$id])['cnt'];
         }
         return $customer;
     }

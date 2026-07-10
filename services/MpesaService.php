@@ -205,6 +205,11 @@ class MpesaService {
         $stmt->bind_param("ssssss", $receipt, $transactionDate, $phone, $amount, $callbackJson, $checkoutRequestId);
         $stmt->execute();
 
+        $txn = $this->db->query("SELECT order_id, amount FROM mpesa_transactions WHERE checkout_request_id = '" . $this->db->escape($checkoutRequestId) . "'")->fetch_assoc();
+        if ($txn && $txn['order_id']) {
+            (new Order())->updatePayment($txn['order_id'], $txn['amount']);
+        }
+
         $stmt = $this->db->prepare("UPDATE mpesa_callbacks SET processed = 1 WHERE checkout_request_id = ?");
         $stmt->bind_param("s", $checkoutRequestId);
         $stmt->execute();

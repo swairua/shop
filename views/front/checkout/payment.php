@@ -16,15 +16,15 @@
                             <span class="visually-hidden">Waiting for payment...</span>
                         </div>
                     </div>
-                    <p class="text-muted small">Waiting for payment confirmation...</p>
+                    <p class="text-muted small" id="countdownText">Waiting for payment confirmation...</p>
 
                     <div id="paymentStatus" class="alert d-none"></div>
 
                     <button class="btn btn-outline-primary" id="checkPaymentStatus" style="display:none">
-                        Check Payment Status
+                        <i class="bi bi-arrow-repeat"></i> Check Payment Status
                     </button>
                     <a href="<?= base_url('orders/confirmation/' . $order['id']) ?>" class="btn btn-success" id="viewOrderBtn" style="display:none">
-                        View Order
+                        <i class="bi bi-check-circle"></i> View Order
                     </a>
                 </div>
             </div>
@@ -33,29 +33,53 @@
 </div>
 
 <script>
-let checkInterval;
-const checkoutId = '<?= $checkout_id ?>';
-const orderId = '<?= $order['id'] ?? 0 ?>';
+var checkoutId = '<?= $checkout_id ?>';
+var orderId = '<?= $order['id'] ?? 0 ?>';
+var checkInterval;
+var countdown = 60;
+
+var statusEl = document.getElementById('paymentStatus');
+var spinner = document.querySelector('.spinner-border');
+var countdownText = document.getElementById('countdownText');
+var viewBtn = document.getElementById('viewOrderBtn');
+var checkBtn = document.getElementById('checkPaymentStatus');
 
 function checkStatus() {
     if (!checkoutId) return;
-    $.post('<?= base_url('cart/checkout/payment') ?>', { action: 'check_status', checkout_request_id: checkoutId }, function(res) {
-        if (res.ResultCode === '0' || res.resultCode === 0) {
+    fetch('<?= base_url('cart/checkout/payment') ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=check_status&checkout_request_id=' + encodeURIComponent(checkoutId)
+    }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.ResultCode === '0' || res.resultCode === 0 || res.ResultCode === 0) {
             clearInterval(checkInterval);
-            $('#paymentStatus').removeClass('d-none alert-warning').addClass('alert-success').html('Payment confirmed!');
-            $('.spinner-border').hide();
-            $('#viewOrderBtn').show();
+            statusEl.className = 'alert alert-success';
+            statusEl.textContent = 'Payment confirmed!';
+            statusEl.classList.remove('d-none');
+            spinner.style.display = 'none';
+            countdownText.textContent = 'Payment successful!';
+            viewBtn.style.display = 'inline-block';
+            checkBtn.style.display = 'none';
         }
-    });
+    }).catch(function() {});
+}
+
+function tick() {
+    countdown--;
+    if (countdown <= 0) {
+        clearInterval(checkInterval);
+        spinner.style.display = 'none';
+        countdownText.textContent = 'Payment still pending.';
+        statusEl.className = 'alert alert-warning';
+        statusEl.innerHTML = 'Payment still pending. <button class="btn btn-sm btn-primary" onclick="checkStatus()">Check Again</button>';
+        statusEl.classList.remove('d-none');
+        checkBtn.style.display = 'inline-block';
+    } else {
+        countdownText.textContent = 'Auto-retrying in ' + countdown + 's...';
+    }
 }
 
 if (checkoutId) {
-    checkInterval = setInterval(checkStatus, 5000);
-    setTimeout(function() {
-        clearInterval(checkInterval);
-        $('#paymentStatus').removeClass('d-none').addClass('alert-warning').html('Payment still pending. <button class="btn btn-sm btn-primary" onclick="checkStatus()">Check Again</button>');
-        $('.spinner-border').hide();
-        $('#checkPaymentStatus').show();
-    }, 60000);
+    checkInterval = setInterval(function() { checkStatus(); tick(); }, 1000);
 }
 </script>

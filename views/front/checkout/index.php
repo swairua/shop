@@ -128,6 +128,13 @@
                             </label>
                         </div>
                         <?php endforeach; ?>
+                        <div class="form-check mb-2">
+                            <input type="radio" name="payment_method" value="paypal" class="form-check-input" id="pmPaypal">
+                            <label class="form-check-label" for="pmPaypal">
+                                <strong><i class="bi bi-paypal" style="color:#003087;"></i> PayPal</strong>
+                                <br><small class="text-muted">Pay with your PayPal account</small>
+                            </label>
+                        </div>
                         <?php $waNum = App::getSetting('whatsapp_number', ''); ?>
                         <?php if ($waNum): ?>
                         <hr>
@@ -190,6 +197,20 @@
                                 <span>Subtotal</span>
                                 <strong><?= format_price($cart['subtotal'] ?? 0) ?></strong>
                             </div>
+                            <div class="list-group-item p-3">
+                                <?php if (!$cart['coupon_id']): ?>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" id="checkoutCouponCode" placeholder="Coupon code">
+                                    <button class="btn btn-outline-primary" id="checkoutApplyCoupon" type="button">Apply</button>
+                                </div>
+                                <div id="checkoutCouponMsg" class="mt-1 small"></div>
+                                <?php else: ?>
+                                <div class="d-flex justify-content-between align-items-center small text-success">
+                                    <span>Coupon <strong><?= $cart['coupon_code'] ?></strong> applied</span>
+                                    <button class="btn-close" id="checkoutRemoveCoupon" type="button"></button>
+                                </div>
+                                <?php endif; ?>
+                            </div>
                             <?php if (($cart['discount'] ?? 0) > 0): ?>
                             <div class="list-group-item d-flex justify-content-between text-success">
                                 <span>Discount</span>
@@ -214,6 +235,7 @@
                         <button type="submit" class="btn btn-primary btn-lg w-100" id="placeOrderBtn">
                             <i class="bi bi-credit-card"></i> Place Order
                         </button>
+                        <div id="paypal-button-container" class="mt-2" style="display:none;"></div>
                         <div class="text-center mt-2">
                             <small class="text-muted"><i class="bi bi-shield-check"></i> Secure checkout</small>
                         </div>
@@ -226,8 +248,83 @@
 
 <script>
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    if (document.querySelector('input[name="payment_method"]:checked')?.value === 'paypal') {
+        e.preventDefault();
+        return;
+    }
     var btn = document.getElementById('placeOrderBtn');
     btn.classList.add('btn-loading');
     btn.disabled = true;
+});
+
+var paypalClientId = '<?= App::getSetting('paypal_client_id', '') ?>';
+var pmRadios = document.querySelectorAll('input[name="payment_method"]');
+var placeOrderBtn = document.getElementById('placeOrderBtn');
+var paypalContainer = document.getElementById('paypal-button-container');
+
+function togglePaypalButton() {
+    var selected = document.querySelector('input[name="payment_method"]:checked');
+    if (selected && selected.value === 'paypal' && paypalClientId) {
+        placeOrderBtn.style.display = 'none';
+        paypalContainer.style.display = 'block';
+        if (typeof paypal !== 'undefined') {
+            paypal.Buttons({
+                createOrder: function() {
+                    return fetch('<?= base_url('api/paypal/create-order') ?>', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: new URLSearchParams(new FormData(document.getElementById('checkoutForm'))).toString()
+                    }).then(function(r) { return r.json(); }).then(function(d) {
+                        if (d.error) throw new Error(d.error);
+                        return d.id;
+                    });
+                },
+                onApprove: function(data) {
+                    return fetch('<?= base_url('api/paypal/capture-order') ?>', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: 'paypal_order_id=' + data.orderID
+                    }).then(function(r) { return r.json(); }).then(function(d) {
+                        if (d.success) {
+                            window.location.href = '<?= base_url('orders/confirmation/') ?>' + d.order_id;
+                        } else {
+                            showToast(d.message || 'Payment failed', 'error');
+                        }
+                    });
+                },
+                onError: function(err) {
+                    showToast('PayPal error: ' + err.toString(), 'error');
+                }
+            }).render('#paypal-button-container');
+        }
+    } else {
+        placeOrderBtn.style.display = 'block';
+        paypalContainer.style.display = 'none';
+    }
+}
+
+pmRadios.forEach(function(r) { r.addEventListener('change', togglePaypalButton); });
+togglePaypalButton();
+
+/* Checkout coupon AJAX */
+document.getElementById('checkoutApplyCoupon')?.addEventListener('click', function() {
+    var code = document.getElementById('checkoutCouponCode').value;
+    if (!code) return;
+    var msg = document.getElementById('checkoutCouponMsg');
+    fetch('<?= base_url('api/cart/apply-coupon') ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'code=' + encodeURIComponent(code)
+    }).then(function(r) { return r.json(); }).then(function(res) {
+        msg.textContent = res.message;
+        msg.style.color = res.success ? 'var(--bs-success)' : 'var(--bs-danger)';
+        if (res.success) setTimeout(function() { location.reload(); }, 1000);
+    });
+});
+
+document.getElementById('checkoutRemoveCoupon')?.addEventListener('click', function() {
+    fetch('<?= base_url('api/cart/remove-coupon') ?>', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(res) { if (res.success) location.reload(); });
 });
 </script>

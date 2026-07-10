@@ -330,6 +330,8 @@ class Schema {
             FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
             FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $this->db->query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS paypal_order_id VARCHAR(50) DEFAULT NULL AFTER payment_method");
     }
 
     private function createOrderItemsTable() {
@@ -817,6 +819,18 @@ class Schema {
         $this->seedSettings();
         $this->seedAdminUser();
         $this->seedSampleData();
+        $this->seedExtras();
+    }
+
+    private function seedExtras() {
+        $r = $this->db->query("SHOW COLUMNS FROM orders LIKE 'paypal_order_id'");
+        if (!$r->fetch_assoc()) {
+            $this->db->query("ALTER TABLE orders ADD COLUMN paypal_order_id VARCHAR(50) DEFAULT NULL AFTER payment_method");
+        }
+
+        $this->db->query("INSERT IGNORE INTO payment_methods (name, slug, description, type, status, sort_order) VALUES ('PayPal', 'paypal', 'Pay with your PayPal account', 'paypal', 'active', 4)");
+
+        $this->db->query("INSERT IGNORE INTO coupons (code, type, value, min_order_amount, max_discount, usage_limit, used_count, starts_at, expires_at, status) VALUES ('WELCOME10', 'percentage', 10.00, 5000.00, 1000.00, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 'active')");
     }
 
     private function seedSettings() {
@@ -885,6 +899,11 @@ class Schema {
             ['mpesa_confirmation_url', 'http://localhost/shop/api/mpesa/confirm', 'mpesa', 'text'],
             ['mpesa_queue_timeout_url', 'http://localhost/shop/api/mpesa/timeout', 'mpesa', 'text'],
             ['mpesa_result_url', 'http://localhost/shop/api/mpesa/result', 'mpesa', 'text'],
+            ['paypal_environment', 'sandbox', 'paypal', 'text'],
+            ['paypal_client_id', '', 'paypal', 'text'],
+            ['paypal_secret', '', 'paypal', 'text'],
+            ['paypal_webhook_id', '', 'paypal', 'text'],
+            ['paypal_currency', 'KES', 'paypal', 'text'],
         ];
 
         foreach ($defaults as $setting) {
@@ -951,6 +970,9 @@ class Schema {
             ('Cash on Delivery', 'cod', 'Pay when you receive', 'cod', 'active', 1),
             ('M-Pesa', 'mpesa', 'Pay via M-Pesa', 'mpesa', 'active', 2),
             ('Bank Transfer', 'bank', 'Pay via bank transfer', 'bank', 'active', 3)");
+
+        $this->db->query("INSERT IGNORE INTO coupons (code, type, value, min_order_amount, max_discount, usage_limit, used_count, starts_at, expires_at, status) VALUES
+            ('WELCOME10', 'percentage', 10.00, 5000.00, 1000.00, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 'active')");
 
         $this->db->query("INSERT IGNORE INTO pages (title, slug, content, meta_title, meta_description, status) VALUES
             ('About Us', 'about', '<h3>Welcome to My Shop</h3><p>We are a leading e-commerce platform dedicated to providing quality products at affordable prices. Founded with a passion for excellence, we serve thousands of happy customers across the region.</p><p>Our mission is to make shopping easy, secure, and enjoyable for everyone.</p>', 'About Us - My Shop', 'Learn more about My Shop and our mission', 'published'),

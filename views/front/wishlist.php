@@ -3,7 +3,7 @@
     <?php
     $wishlist = [];
     if (is_customer()) {
-        $result = $this->db->query("SELECT p.* FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.customer_id = " . intval($_SESSION['customer_id']) . " ORDER BY w.created_at DESC");
+        $result = $this->db->query("SELECT p.*, 1 as in_wishlist FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.customer_id = " . intval($_SESSION['customer_id']) . " ORDER BY w.created_at DESC");
         $wishlist = $result->fetch_all(MYSQLI_ASSOC);
     }
     ?>

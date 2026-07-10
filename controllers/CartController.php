@@ -127,6 +127,8 @@ class CartController extends Controller {
             } else {
                 if ($paymentMethod === 'cod') {
                     $order->addStatusHistory($orderId, 'pending', 'Order placed with Cash on Delivery');
+                } elseif ($paymentMethod === 'whatsapp') {
+                    $order->addStatusHistory($orderId, 'pending', 'Order placed via WhatsApp');
                 }
                 $this->setFlash('success', 'Order placed successfully!');
                 $this->redirect('orders/confirmation/' . $orderId);

@@ -230,19 +230,119 @@ class ApiController extends Controller {
         $this->json(['success' => true, 'message' => 'Review submitted for approval']);
     }
 
-    public function subscribe() {
-        $email = trim($this->post('email', ''));
-        $name = trim($this->post('name', ''));
-        if (!validate_email($email)) {
-            $this->json(['success' => false, 'message' => 'Invalid email address'], 422);
+    public function paypalCreateOrder() {
+        $sessionId = session_id();
+        $customerId = $_SESSION['customer_id'] ?? null;
+        $cart = new Cart();
+        $cartData = $cart->getOrCreateCart($customerId, $sessionId);
+
+        if (empty($cartData['items'])) {
+            $this->json(['error' => 'Cart is empty'], 400);
         }
-        $check = $this->db->query("SELECT id FROM subscribers WHERE email = '" . $this->db->escape($email) . "'")->fetch_assoc();
-        if ($check) {
-            $this->json(['success' => false, 'message' => 'Already subscribed'], 409);
+
+        $order = new Order();
+        $customerId = $customerId ?: $this->createGuestCustomer();
+        $addressId = intval($this->post('address_id')) ?: $this->createCheckoutAddress($customerId);
+
+        $orderData = [
+            'shipping_address_id' => $addressId,
+            'billing_address_id' => $addressId,
+            'coupon_id' => $cartData['coupon_id'],
+            'subtotal' => $cartData['subtotal'] ?? 0,
+            'discount' => $cartData['discount'] ?? 0,
+            'tax' => $cartData['tax'] ?? 0,
+            'shipping_cost' => $cartData['shipping_cost'] ?? 0,
+            'total' => $cartData['total'] ?? 0,
+            'shipping_method' => sanitize_input($this->post('shipping_method', 'standard')),
+            'payment_method' => 'paypal',
+            'notes' => sanitize_input($this->post('notes'))
+        ];
+
+        $orderId = $order->createFromCart($cartData['id'], $customerId, $orderData);
+        if (!$orderId) {
+            $this->json(['error' => 'Failed to create order'], 500);
         }
-        $stmt = $this->db->prepare("INSERT INTO subscribers (email, name, status) VALUES (?, ?, 'active')");
-        $stmt->bind_param("ss", $email, $name);
+
+        if ($cartData['coupon_id']) {
+            (new Coupon())->incrementUsage($cartData['coupon_id']);
+        }
+
+        $orderNumber = $order->find($orderId)['order_number'];
+        $amount = $orderData['total'];
+
+        $paypal = new PayPalService();
+        $result = $paypal->createOrder($amount, $orderNumber);
+
+        if (!$result['success']) {
+            $order->addStatusHistory($orderId, 'failed', 'PayPal order creation failed: ' . $result['message']);
+            $this->json(['error' => $result['message']], 500);
+        }
+
+        $stmt = $this->db->prepare("UPDATE orders SET paypal_order_id = ?, payment_status = 'pending' WHERE id = ?");
+        $stmt->bind_param("si", $result['paypal_order_id'], $orderId);
         $stmt->execute();
-        $this->json(['success' => true, 'message' => 'Subscribed successfully']);
+
+        $_SESSION['paypal_order_id'] = $orderId;
+        $this->json(['id' => $result['paypal_order_id'], 'order_id' => $orderId]);
+    }
+
+    public function paypalCaptureOrder() {
+        $paypalOrderId = sanitize_input($this->post('paypal_order_id'));
+        if (!$paypalOrderId) {
+            $this->json(['success' => false, 'message' => 'Missing PayPal order ID'], 400);
+        }
+
+        $paypal = new PayPalService();
+        $result = $paypal->captureOrder($paypalOrderId);
+
+        if (!$result['success']) {
+            $this->json(['success' => false, 'message' => $result['message'] ?? 'Payment capture failed']);
+        }
+
+        $orderRow = $this->db->query("SELECT id, total FROM orders WHERE paypal_order_id = '" . $this->db->escape($paypalOrderId) . "'")->fetch_assoc();
+        if ($orderRow) {
+            (new Order())->updatePayment($orderRow['id'], $result['amount']);
+            $this->json(['success' => true, 'order_id' => $orderRow['id']]);
+        } else {
+            $this->json(['success' => false, 'message' => 'Order not found']);
+        }
+    }
+
+    public function mpesaPaymentStatus() {
+        $orderId = intval($this->get('order_id'));
+        $txn = $this->db->query("SELECT * FROM mpesa_transactions WHERE order_id = {$orderId} ORDER BY id DESC LIMIT 1")->fetch_assoc();
+        $this->json([
+            'status' => $txn['status'] ?? 'unknown',
+            'receipt' => $txn['mpesa_receipt_number'] ?? '',
+            'amount' => $txn['amount'] ?? 0
+        ]);
+    }
+
+    private function createGuestCustomer() {
+        $name = sanitize_input($this->post('name', 'Guest'));
+        $email = sanitize_input($this->post('email', 'guest_' . time() . '@example.com'));
+        $phone = sanitize_input($this->post('phone', ''));
+        $existing = (new Customer())->findBy('email', $email, 1);
+        if ($existing) {
+            $_SESSION['customer_id'] = $existing['id'];
+            $_SESSION['customer_name'] = $existing['name'];
+            $_SESSION['customer_email'] = $existing['email'];
+            return $existing['id'];
+        }
+        $auth = new Auth();
+        return $auth->register(['name' => $name, 'email' => $email, 'phone' => $phone, 'password' => bin2hex(random_bytes(8))]);
+    }
+
+    private function createCheckoutAddress($customerId) {
+        $addrModel = new Model('customer_addresses');
+        return $addrModel->create([
+            'customer_id' => $customerId,
+            'type' => 'both',
+            'address_line1' => sanitize_input($this->post('address_line1', 'N/A')),
+            'city' => sanitize_input($this->post('city', 'Nairobi')),
+            'country' => sanitize_input($this->post('country', 'Kenya')),
+            'phone' => sanitize_input($this->post('phone', '')),
+            'is_default' => 1
+        ]);
     }
 }

@@ -76,7 +76,7 @@
             </div>
 
             <div class="d-flex gap-2 mb-3">
-                <button class="btn btn-outline-danger add-to-wishlist" data-product-id="<?= $product['id'] ?>"><i class="bi bi-heart"></i> Wishlist</button>
+                <button class="btn btn-outline-danger add-to-wishlist <?= $inWishlist ? 'active' : '' ?>" data-product-id="<?= $product['id'] ?>"><i class="bi bi-heart<?= $inWishlist ? '-fill' : '' ?>"></i> Wishlist</button>
                 <button class="btn btn-outline-secondary add-to-compare" data-product-id="<?= $product['id'] ?>"><i class="bi bi-arrow-left-right"></i> Compare</button>
             </div>
 

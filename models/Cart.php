@@ -132,19 +132,15 @@ class Cart extends Model {
     }
 
     public function applyCoupon($cartId, $code) {
-        $coupon = (new Coupon())->findBy('code', $code, 1);
-        if (!$coupon || $coupon['status'] != 'active') {
-            return ['success' => false, 'message' => 'Invalid or expired coupon'];
+        $cart = $this->find($cartId);
+        if (!$cart) return ['success' => false, 'message' => 'Cart not found'];
+
+        $result = (new Coupon())->validateCoupon($code, $cart['subtotal'] ?? 0, $cart['customer_id']);
+        if (!$result['valid']) {
+            return ['success' => false, 'message' => $result['message']];
         }
 
-        if ($coupon['expires_at'] && strtotime($coupon['expires_at']) < time()) {
-            return ['success' => false, 'message' => 'Coupon has expired'];
-        }
-
-        if ($coupon['usage_limit'] && $coupon['used_count'] >= $coupon['usage_limit']) {
-            return ['success' => false, 'message' => 'Coupon usage limit reached'];
-        }
-
+        $coupon = $result['coupon'];
         $stmt = $this->db->prepare("UPDATE cart SET coupon_id = ?, coupon_code = ? WHERE id = ?");
         $stmt->bind_param("isi", $coupon['id'], $code, $cartId);
         $stmt->execute();
