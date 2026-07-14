@@ -26,7 +26,7 @@ class MpesaService {
         $this->initiatorName = $settings['mpesa_initiator_name'] ?? '';
         $this->initiatorPassword = $settings['mpesa_initiator_password'] ?? '';
         $this->environment = $settings['mpesa_environment'] ?? 'sandbox';
-        $this->callbackUrl = $settings['mpesa_callback_url'] ?? 'http://localhost/shop/api/mpesa/callback';
+        $this->callbackUrl = $settings['mpesa_callback_url'] ?? 'https://www.helixgeneralhardware.com/api/mpesa/callback';
     }
 
     private function getBaseUrl() {

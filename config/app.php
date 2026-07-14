@@ -1,9 +1,9 @@
 <?php
 return [
-    'name' => 'Shop',
+    'name' => 'Helix General Hardware',
     'version' => '1.0.0',
-    'debug' => true,
-    'url' => 'http://localhost:8082/shop',
+    'debug' => false,
+    'url' => 'https://www.helixgeneralhardware.com',
     'timezone' => 'Africa/Nairobi',
     'currency' => 'KES',
     'currency_symbol' => 'KSh',
@@ -23,7 +23,7 @@ return [
     ],
     'session' => [
         'lifetime' => 86400,
-        'secure' => false,
+        'secure' => true,
         'http_only' => true
     ],
     'mail' => [
@@ -33,7 +33,7 @@ return [
         'username' => '',
         'password' => '',
         'encryption' => 'tls',
-        'from_address' => '',
-        'from_name' => ''
+        'from_address' => 'info@helixgeneralhardware.com',
+        'from_name' => 'Helix General Hardware'
     ]
 ];

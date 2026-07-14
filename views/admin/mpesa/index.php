@@ -59,7 +59,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Callback Base URL</label>
-                        <input type="url" name="mpesa_callback_url" class="form-control" value="<?= $settings['mpesa_callback_url'] ?? 'http://localhost/shop/api/mpesa/callback' ?>">
+                        <input type="url" name="mpesa_callback_url" class="form-control" value="<?= $settings['mpesa_callback_url'] ?? 'https://www.helixgeneralhardware.com/api/mpesa/callback' ?>">
                     </div>
                     <button type="submit" class="btn btn-primary">Save Settings</button>
                     <a href="<?= base_url('admin/mpesa/register-urls') ?>" class="btn btn-success">Register C2B URLs</a>
