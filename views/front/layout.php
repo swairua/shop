@@ -114,7 +114,7 @@
 
     <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="mobileNav">
         <div class="offcanvas-header border-bottom">
-            <h5 class="mb-0"><?= App::getSetting('shop_name', 'Menu') ?></h5>
+            <h5 class="mb-0"><?php if (App::getSetting('shop_logo')): ?><img src="<?= base_url('uploads/settings/' . App::getSetting('shop_logo')) ?>" height="28" alt="Logo"><?php else: ?><?= App::getSetting('shop_name', 'Menu') ?><?php endif; ?></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0">

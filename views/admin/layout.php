@@ -9,13 +9,31 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <link href="<?= base_url('assets/css/admin.css') ?>" rel="stylesheet">
     <?php if (isset($extraCss)) echo $extraCss; ?>
+    <style>
+        :root {
+            --bs-primary: <?= App::getSetting('primary_color', '#D22B2B') ?>;
+            --bs-primary-rgb: <?php $c = App::getSetting('primary_color', '#D22B2B'); echo hexdec(substr($c,1,2)) . ',' . hexdec(substr($c,3,2)) . ',' . hexdec(substr($c,5,2)); ?>;
+            --bs-warning: <?= App::getSetting('accent_color', '#FFD700') ?>;
+            --bs-warning-rgb: <?php $c = App::getSetting('accent_color', '#FFD700'); echo hexdec(substr($c,1,2)) . ',' . hexdec(substr($c,3,2)) . ',' . hexdec(substr($c,5,2)); ?>;
+            --admin-sidebar-bg: <?= App::getSetting('header_bg', '#1A1A2E') ?>;
+            --admin-sidebar-active: <?= App::getSetting('primary_color', '#D22B2B') ?>;
+        }
+        .btn-primary { --bs-btn-bg: var(--bs-primary); --bs-btn-border-color: var(--bs-primary); }
+        .btn-primary:hover { --bs-btn-hover-bg: <?php $c = App::getSetting('primary_color', '#D22B2B'); echo 'rgba(' . hexdec(substr($c,1,2)) . ',' . hexdec(substr($c,3,2)) . ',' . hexdec(substr($c,5,2)) . ',.85)'; ?>; }
+        .text-primary { color: var(--bs-primary) !important; }
+        .bg-primary { background-color: var(--bs-primary) !important; }
+    </style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="<?= base_url('admin/dashboard') ?>" class="text-white text-decoration-none">
-                    <h5><i class="bi bi-shop"></i> <?= App::getSetting('shop_name', 'Admin') ?></h5>
+                    <?php if (App::getSetting('shop_logo')): ?>
+                        <img src="<?= base_url('uploads/settings/' . App::getSetting('shop_logo')) ?>" height="36" alt="Logo">
+                    <?php else: ?>
+                        <h5><i class="bi bi-shop"></i> <?= App::getSetting('shop_name', 'Admin') ?></h5>
+                    <?php endif; ?>
                 </a>
             </div>
             <ul class="nav flex-column">

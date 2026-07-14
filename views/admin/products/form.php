@@ -176,7 +176,7 @@
                     <div class="row g-2">
                         <?php foreach ($productImages as $img): ?>
                         <div class="col-4">
-                            <img src="<?= base_url('uploads/products/' . $img['image']) ?>" class="img-thumbnail" style="width:100%;height:80px;object-fit:cover;">
+                            <img src="<?= product_image($img['image']) ?>" class="img-thumbnail" style="width:100%;height:80px;object-fit:cover;">
                         </div>
                         <?php endforeach; ?>
                     </div>

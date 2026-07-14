@@ -835,15 +835,15 @@ class Schema {
 
     private function seedSettings() {
         $defaults = [
-            ['shop_name', 'My Shop', 'general', 'text'],
-            ['shop_email', 'admin@myshop.com', 'general', 'email'],
-            ['shop_phone', '+254700000000', 'general', 'text'],
-            ['shop_address', 'Nairobi, Kenya', 'general', 'text'],
+            ['shop_name', 'Helix General Hardware', 'general', 'text'],
+            ['shop_email', 'info@layonsconstruction.com', 'general', 'email'],
+            ['shop_phone', '0720 717463', 'general', 'text'],
+            ['shop_address', 'P.O Box 2424-01000, Thika, Kenya', 'general', 'text'],
             ['shop_currency', 'KES', 'general', 'text'],
             ['shop_currency_symbol', 'KSh', 'general', 'text'],
             ['shop_timezone', 'Africa/Nairobi', 'general', 'text'],
-            ['shop_logo', '', 'general', 'image'],
-            ['shop_favicon', '', 'general', 'image'],
+            ['shop_logo', 'logo-1777881322.jpg', 'general', 'image'],
+            ['shop_favicon', 'logo-1777881322.jpg', 'general', 'image'],
             ['tax_enabled', '1', 'tax', 'text'],
             ['tax_rate', '16.00', 'tax', 'text'],
             ['tax_label', 'VAT (16%)', 'tax', 'text'],
@@ -853,10 +853,10 @@ class Schema {
             ['enable_reviews', '1', 'catalog', 'text'],
             ['enable_wishlist', '1', 'catalog', 'text'],
             ['enable_compare', '1', 'catalog', 'text'],
-            ['meta_title', 'My Shop - Best Online Store', 'seo', 'text'],
-            ['meta_description', 'Welcome to our online store', 'seo', 'text'],
-            ['og_title', 'My Shop', 'seo', 'text'],
-            ['og_description', 'Welcome to our online store', 'seo', 'text'],
+            ['meta_title', 'Helix General Hardware - Your Trusted Hardware Partner', 'seo', 'text'],
+            ['meta_description', 'Quality building materials, plumbing, electrical supplies, tools & paint. Shop from Helix General Hardware.', 'seo', 'text'],
+            ['og_title', 'Helix General Hardware', 'seo', 'text'],
+            ['og_description', 'Quality building materials, plumbing, electrical supplies, tools & paint.', 'seo', 'text'],
             ['og_image', '', 'seo', 'image'],
             ['facebook_url', '', 'social', 'text'],
             ['twitter_url', '', 'social', 'text'],
@@ -866,23 +866,23 @@ class Schema {
             ['linkedin_url', '', 'social', 'text'],
             ['pinterest_url', '', 'social', 'text'],
             ['whatsapp_number', '', 'social', 'text'],
-            ['whatsapp_message', 'Hi! I want to order from your shop', 'social', 'text'],
-            ['hero_heading', 'Discover Premium Products', 'hero', 'text'],
-            ['hero_subheading', 'Shop the latest trends with unbeatable prices and fast delivery to your doorstep.', 'hero', 'text'],
+            ['whatsapp_message', 'Hi! I want to order hardware supplies from Helix General Hardware', 'social', 'text'],
+            ['hero_heading', 'Your Trusted Hardware Partner', 'hero', 'text'],
+            ['hero_subheading', 'Quality building materials, tools & supplies for every project. We deliver to your doorstep.', 'hero', 'text'],
             ['hero_button_text', 'Shop Now', 'hero', 'text'],
             ['hero_button_url', 'shop', 'hero', 'text'],
             ['hero_secondary_text', 'Learn More', 'hero', 'text'],
             ['hero_secondary_url', '#featured', 'hero', 'text'],
             ['hero_image', '', 'hero', 'image'],
-            ['hero_bg_start', '#0f172a', 'hero', 'text'],
-            ['hero_bg_end', '#1e3a5f', 'hero', 'text'],
+            ['hero_bg_start', '#1A1A2E', 'hero', 'text'],
+            ['hero_bg_end', '#D22B2B', 'hero', 'text'],
             ['hero_overlay', '0.6', 'hero', 'text'],
             ['hero_animation', 'particles', 'hero', 'text'],
-            ['primary_color', '#2563eb', 'appearance', 'text'],
-            ['secondary_color', '#7c3aed', 'appearance', 'text'],
-            ['accent_color', '#f59e0b', 'appearance', 'text'],
-            ['header_bg', '#0f172a', 'appearance', 'text'],
-            ['footer_bg', '#0f172a', 'appearance', 'text'],
+            ['primary_color', '#D22B2B', 'appearance', 'text'],
+            ['secondary_color', '#8B0000', 'appearance', 'text'],
+            ['accent_color', '#FFD700', 'appearance', 'text'],
+            ['header_bg', '#D22B2B', 'appearance', 'text'],
+            ['footer_bg', '#D22B2B', 'appearance', 'text'],
             ['font_family', "'Inter', sans-serif", 'appearance', 'text'],
             ['border_radius', '0.5rem', 'appearance', 'text'],
             ['mpesa_environment', 'sandbox', 'mpesa', 'text'],
@@ -932,31 +932,26 @@ class Schema {
         if ($row['cnt'] > 0) return;
 
         $this->db->query("INSERT INTO categories (name, slug, description, sort_order, status) VALUES
-            ('Electronics', 'electronics', 'Electronic devices and accessories', 1, 'active'),
-            ('Fashion', 'fashion', 'Clothing and accessories', 2, 'active'),
-            ('Home & Living', 'home-living', 'Home and living products', 3, 'active')");
-
-        $this->db->query("INSERT INTO categories (parent_id, name, slug, description, sort_order, status) VALUES
-            (1, 'Phones', 'phones', 'Mobile phones', 1, 'active'),
-            (1, 'Computers', 'computers', 'Laptops and desktops', 2, 'active'),
-            (2, 'Men', 'men', 'Men fashion', 1, 'active'),
-            (2, 'Women', 'women', 'Women fashion', 2, 'active'),
-            (3, 'Furniture', 'furniture', 'Home furniture', 1, 'active')");
+            ('Building Materials', 'building-materials', 'Cement, steel, timber and construction supplies', 1, 'active'),
+            ('Plumbing', 'plumbing', 'Pipes, fittings, valves and plumbing accessories', 2, 'active'),
+            ('Electrical', 'electrical', 'Cables, switches, sockets and electrical supplies', 3, 'active'),
+            ('Tools & Hardware', 'tools-hardware', 'Power tools, hand tools and hardware accessories', 4, 'active'),
+            ('Paint & Finishes', 'paint-finishes', 'Paints, brushes, rollers and finishing supplies', 5, 'active')");
 
         $this->db->query("INSERT INTO brands (name, slug, status) VALUES
-            ('Apple', 'apple', 'active'),
-            ('Samsung', 'samsung', 'active'),
-            ('Nike', 'nike', 'active'),
-            ('Adidas', 'adidas', 'active')");
+            ('Makita', 'makita', 'active'),
+            ('Bosch', 'bosch', 'active'),
+            ('Crown Paints', 'crown-paints', 'active'),
+            ('Duracoat', 'duracoat', 'active')");
 
         $this->db->query("INSERT INTO tax_classes (name, slug, rate, type, status) VALUES
             ('Standard VAT', 'standard-vat', 16.00, 'percentage', 'active'),
             ('Zero Rated', 'zero-rated', 0.00, 'percentage', 'active')");
 
         $this->db->query("INSERT INTO products (category_id, brand_id, tax_class_id, sku, barcode, name, slug, description, cost_price, selling_price, quantity, reorder_level, type, status, is_featured, is_new_arrival, is_best_seller, featured_image) VALUES
-            (2, 1, 1, 'PRD-001', '200000000001', 'iPhone 15 Pro', 'iphone-15-pro', 'Latest Apple iPhone', 80000.00, 120000.00, 50, 5, 'physical', 'active', 1, 1, 1, 'https://picsum.photos/seed/iphone15/600/600'),
-            (2, 2, 1, 'PRD-002', '200000000002', 'Samsung Galaxy S24', 'samsung-galaxy-s24', 'Latest Samsung Galaxy', 70000.00, 100000.00, 40, 5, 'physical', 'active', 1, 1, 0, 'https://picsum.photos/seed/galaxys24/600/600'),
-            (3, 3, 1, 'PRD-003', '200000000003', 'Nike Air Max', 'nike-air-max', 'Comfortable running shoes', 4000.00, 8000.00, 100, 10, 'physical', 'active', 0, 0, 1, 'https://picsum.photos/seed/nikeairmax/600/600')");
+            (1, NULL, 1, 'HGH-001', '200000000001', 'Portland Cement 50kg', 'portland-cement-50kg', 'High quality Portland cement for construction and masonry work', 600.00, 700.00, 200, 20, 'physical', 'active', 1, 0, 1, 'cement.jpg'),
+            (2, NULL, 1, 'HGH-002', '200000000002', 'PVC Pipe 1-inch 4m', 'pvc-pipe-1inch-4m', 'Durable PVC pipe for plumbing and drainage applications', 350.00, 450.00, 150, 15, 'physical', 'active', 1, 1, 0, 'pvc-pipe.jpg'),
+            (4, 1, 1, 'HGH-003', '200000000003', 'Power Drill 650W', 'power-drill-650w', '650W variable speed power drill with keyless chuck and carrying case', 2800.00, 3500.00, 50, 5, 'physical', 'active', 0, 1, 1, 'power-drill.jpg')");
 
         $this->db->query("INSERT INTO customers (name, email, phone, password, status) VALUES
             ('John Doe', 'john@example.com', '254700000001', '" . password_hash('password123', PASSWORD_DEFAULT) . "', 'active'),
@@ -975,8 +970,8 @@ class Schema {
             ('WELCOME10', 'percentage', 10.00, 5000.00, 1000.00, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 'active')");
 
         $this->db->query("INSERT IGNORE INTO pages (title, slug, content, meta_title, meta_description, status) VALUES
-            ('About Us', 'about', '<h3>Welcome to My Shop</h3><p>We are a leading e-commerce platform dedicated to providing quality products at affordable prices. Founded with a passion for excellence, we serve thousands of happy customers across the region.</p><p>Our mission is to make shopping easy, secure, and enjoyable for everyone.</p>', 'About Us - My Shop', 'Learn more about My Shop and our mission', 'published'),
-            ('Shipping Info', 'shipping-info', '<h3>Shipping Information</h3><p>We offer fast and reliable shipping across the country. Orders are processed within 1-2 business days.</p><h4>Delivery Timeframes</h4><ul><li>Nairobi: 1-2 business days</li><li>Major cities: 2-4 business days</li><li>Upcountry: 4-7 business days</li></ul><h4>Shipping Costs</h4><p>Free shipping on orders over KSh 5,000. Standard shipping rates apply for smaller orders.</p>', 'Shipping Info - My Shop', 'Learn about our shipping policy and delivery timeframes', 'published'),
-            ('Returns & Exchanges', 'returns', '<h3>Returns & Exchanges</h3><p>We want you to be completely satisfied with your purchase. If you are not happy, we offer easy returns within 14 days of delivery.</p><h4>Return Conditions</h4><ul><li>Items must be unused and in original packaging</li><li>Return shipping costs are covered by the customer unless the item is defective</li><li>Refunds are processed within 5-7 business days after we receive the item</li></ul><p>For any questions, please contact our support team.</p>', 'Returns & Exchanges - My Shop', 'Read our returns policy for hassle-free exchanges', 'published')");
+            ('About Us', 'about', '<h3>Welcome to Helix General Hardware</h3><p>We are a trusted hardware supplier dedicated to providing quality building materials, tools, and supplies at affordable prices. Founded with a passion for excellence, we serve contractors, builders, and homeowners across the region.</p><p>Our mission is to make hardware shopping easy, reliable, and convenient for everyone.</p>', 'About Us - Helix General Hardware', 'Learn more about Helix General Hardware and our mission', 'published'),
+            ('Shipping Info', 'shipping-info', '<h3>Shipping Information</h3><p>We offer fast and reliable delivery across the country. Orders are processed within 1-2 business days.</p><h4>Delivery Timeframes</h4><ul><li>Nairobi: 1-2 business days</li><li>Major cities: 2-4 business days</li><li>Upcountry: 4-7 business days</li></ul><h4>Shipping Costs</h4><p>Free delivery on orders over KSh 5,000. Standard shipping rates apply for smaller orders.</p>', 'Shipping Info - Helix General Hardware', 'Learn about our shipping policy and delivery timeframes', 'published'),
+            ('Returns & Exchanges', 'returns', '<h3>Returns & Exchanges</h3><p>We want you to be completely satisfied with your purchase. If you are not happy, we offer easy returns within 14 days of delivery.</p><h4>Return Conditions</h4><ul><li>Items must be unused and in original packaging</li><li>Return shipping costs are covered by the customer unless the item is defective</li><li>Refunds are processed within 5-7 business days after we receive the item</li></ul><p>For any questions, please contact our support team.</p>', 'Returns & Exchanges - Helix General Hardware', 'Read our returns policy for hassle-free exchanges', 'published')");
     }
 }

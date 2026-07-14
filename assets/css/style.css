@@ -70,7 +70,7 @@ a:hover { color: var(--primary-hover); }
 .navbar-main .nav-link:hover,
 .navbar-main .nav-link.active {
     color: #fff !important;
-    background: rgba(255,255,255,.08);
+    background: var(--primary);
 }
 .navbar-main .navbar-brand {
     font-weight: 700;

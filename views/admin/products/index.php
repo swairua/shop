@@ -22,11 +22,7 @@
                     <?php foreach ($products as $p): ?>
                     <tr>
                         <td>
-                            <?php if ($p['featured_image']): ?>
-                                <img src="<?= base_url('uploads/products/' . $p['featured_image']) ?>" width="50" height="50" style="object-fit: cover;" alt="">
-                            <?php else: ?>
-                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:50px;height:50px"><i class="bi bi-image text-muted"></i></div>
-                            <?php endif; ?>
+                                <img src="<?= product_image($p['featured_image'], '100x100') ?>" width="50" height="50" style="object-fit: cover;" alt="">
                         </td>
                         <td><a href="<?= base_url('admin/productEdit/' . $p['id']) ?>" class="text-decoration-none"><?= $p['name'] ?></a></td>
                         <td><?= $p['sku'] ?></td>
